@@ -1,7 +1,9 @@
+package com.thenairn.asynctest.entity;
+
 import java.util.Date;
 
 /**
- * Created by Thomas Nairn on 24/02/2016.
+ * Simple POJO containing the date at which the string was added to the object.
  */
 public class LogMessage {
 

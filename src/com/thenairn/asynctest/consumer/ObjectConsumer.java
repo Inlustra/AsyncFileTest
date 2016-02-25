@@ -1,3 +1,5 @@
+package com.thenairn.asynctest.consumer;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -20,11 +22,42 @@ public abstract class ObjectConsumer<T> implements Runnable, Closeable {
     public void run() {
         while (running.get()) {
             try {
-                waitObjectAvailable();
-                handleObject(queue.poll());
+                lockAndWait();
+                T object = lockAndPoll();
+                handleObject(object);
             } catch (InterruptedException e) {
                 return; //Interrupt should only be called when close() is called.
             }
+        }
+    }
+
+    /**
+     * Locks the queue while waiting for an object (Avoids
+     *
+     * @throws InterruptedException
+     */
+    private T lockAndPoll() throws InterruptedException {
+        lock.lock();
+        try {
+            return queue.poll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Locks the o
+     *
+     * @throws InterruptedException
+     */
+    private void lockAndWait() throws InterruptedException {
+        lock.lock();
+        try {
+            while (queue.isEmpty()) {
+                waitObjectAvailable();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -33,21 +66,18 @@ public abstract class ObjectConsumer<T> implements Runnable, Closeable {
      *
      * @throws InterruptedException
      */
-    private void waitObjectAvailable() throws InterruptedException {
-        lock.lock();
-        try {
-            while (queue.isEmpty()) {
-                jobReady.await(); //The Queue is empty, wait for a job to be added.
-            }
-        } finally {
-            lock.unlock();
-        }
+    protected void waitObjectAvailable() throws InterruptedException {
+        jobReady.await(); //The Queue is empty, wait for a job to be added.
     }
 
     /**
      * @param object the object to be added to the disk for handling.
      */
     public void add(T object) {
+        if (!running.get()) {
+            System.err.println("Consumer is closed. Sinking: " + object);
+            return;
+        }
         lock.lock();
         try {
             this.queue.add(object);

@@ -9,7 +9,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by Thomas Nairn on 24/02/2016.
+ * An Object Queue that is backed by a single condition
+ * The reason I chose to create this instead of using a simple 
+ * BlockingQueue is to enable the addition of multiple conditions whilst
+ * also being able to control the locking mechanism 
+ * 
+ * (Perform actions before locking, such as a flush, without requiring an if statement)
  */
 public abstract class ObjectConsumer<T> implements Runnable, Closeable {
 

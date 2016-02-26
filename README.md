@@ -20,7 +20,7 @@ This example features a Logging component that writes to a file upon addition.
     consumer.log(String string);
 ```
 
-## Future Devleopment
+## Future Development
 
-A broker could be created to delegate the addition to the LogConsumer if the write count is too high
-A test framework could be built to ensure that it is functioning correctly
+* A broker could be created to delegate the addition to the LogConsumer if the write count is too high
+* A test framework could be built to ensure that it is functioning correctly
